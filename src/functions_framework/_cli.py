@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import logging.config
 import os
 
 import click
@@ -31,10 +33,14 @@ from functions_framework._http import create_server
 )
 @click.option("--host", envvar="HOST", type=click.STRING, default="0.0.0.0")
 @click.option("--port", envvar="PORT", type=click.INT, default=8080)
+@click.option("--logging-config", envvar="LOGGING_CONFIG", type=click.Path(), default=None)
 @click.option("--debug", envvar="DEBUG", is_flag=True)
 @click.option("--dry-run", envvar="DRY_RUN", is_flag=True)
-def _cli(target, source, signature_type, host, port, debug, dry_run):
+def _cli(target, source, signature_type, host, port, logging_config, debug, dry_run):
     app = create_app(target, source, signature_type)
+    if logging_config:
+        with open(logging_config, 'r') as f:
+            logging.config.dictConfig(json.load(f))
     if dry_run:
         click.echo("Function: {}".format(target))
         click.echo("URL: http://{}:{}/".format(host, port))
