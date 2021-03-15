@@ -36,7 +36,7 @@ class TraceFilter(logging.Filter):
     def filter(self, record):
         trace_id = ""
         try:
-            if flask is None or not flask.request:
+            if flask and flask.request:
                 header = flask.request.headers.get(self.trace_header)
                 if header:
                     trace_id = header.split("/", 1)[0]
