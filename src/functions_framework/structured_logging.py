@@ -16,10 +16,6 @@ import logging
 
 import flask
 
-"""
-A Logging formatter string that outputs logs as structured JSON
-"""
-STRUCTURED_LOG_FORMAT = '{"message": "%(message)s", "severity": "%(levelname)s", "trace", "%(trace)s"}'
 
 class TraceFilter(logging.Filter):
     """
@@ -34,14 +30,37 @@ class TraceFilter(logging.Filter):
         self.trace_header = trace_header
 
     def filter(self, record):
-        trace_id = ""
+        record.trace = ""
         try:
             if flask and flask.request:
                 header = flask.request.headers.get(self.trace_header)
                 if header:
-                    trace_id = header.split("/", 1)[0]
+                    record.trace = header.split("/", 1)[0]
         except RuntimeError as e:
             # RuntimeError thown when flask session not found
             pass
-        record.trace = trace_id
+        return True
+
+class HttpRequestFilter(logging.Filter):
+    """
+    Logging.Filter subclass class to inject http request data from incoming 
+    Flask requests into log records.
+
+    Will insert empty strings when data can't be found.
+    """
+
+    def filter(self, record):
+        record.request_method = ""
+        record.request_url = ""
+        record.user_agent = ""
+        record.protocol = ""
+        try:
+            if flask and flask.request:
+                record.request_method = flask.request.method
+                record.request_url = flask.request.url
+                record.user_agent = flask.request.user_agent.string
+                record.protocol = flask.request.environ.get("SERVER_PROTOCOL")
+        except RuntimeError as e:
+            # RuntimeError thown when flask session not found
+            pass
         return True
