@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging.config
 import os
 
 import click
 
 from functions_framework import create_app
 from functions_framework._http import create_server
+from functions_framework.logging_format import plain_log_format
 
 
 @click.command()
@@ -31,10 +33,12 @@ from functions_framework._http import create_server
 )
 @click.option("--host", envvar="HOST", type=click.STRING, default="0.0.0.0")
 @click.option("--port", envvar="PORT", type=click.INT, default=8080)
+@click.option("--log-format", envvar="LOG_FORMAT", type=click.STRING, default="plain")
 @click.option("--debug", envvar="DEBUG", is_flag=True)
 @click.option("--dry-run", envvar="DRY_RUN", is_flag=True)
-def _cli(target, source, signature_type, host, port, debug, dry_run):
+def _cli(target, source, signature_type, host, port, log_format, debug, dry_run):
     app = create_app(target, source, signature_type)
+    logging.config.dictConfig(plain_log_format())
     if dry_run:
         click.echo("Function: {}".format(target))
         click.echo("URL: http://{}:{}/".format(host, port))
