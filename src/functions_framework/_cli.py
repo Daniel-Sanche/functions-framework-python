@@ -19,7 +19,7 @@ import click
 
 from functions_framework import create_app
 from functions_framework._http import create_server
-from functions_framework.logging_format import plain_log_format
+from functions_framework.logging_format import get_log_format
 
 
 @click.command()
@@ -38,7 +38,7 @@ from functions_framework.logging_format import plain_log_format
 @click.option("--dry-run", envvar="DRY_RUN", is_flag=True)
 def _cli(target, source, signature_type, host, port, log_format, debug, dry_run):
     app = create_app(target, source, signature_type)
-    logging.config.dictConfig(plain_log_format())
+    logging.config.dictConfig(get_format_dict(log_format))
     if dry_run:
         click.echo("Function: {}".format(target))
         click.echo("URL: http://{}:{}/".format(host, port))

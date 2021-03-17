@@ -14,7 +14,7 @@
 
 import logging
 
-def plain_log_format():
+def get_format_dict(format_name="plain"):
     """
     Constructs a logging config dictionary to print plain logs
     to standard out
@@ -24,12 +24,15 @@ def plain_log_format():
         'formatters':{
             'plain': {
                 'format': '%(message)s'
+            },
+            'structured': {
+                'format': "{\"message\": \"%(message)s\", \"severity\": \"%(levelname)s\"}"
             }
         },
         'handlers': {
             'console': {
                 'class': 'logging.StreamHandler',
-                'formatter': 'plain'
+                'formatter': format_name
             }
         },
         'root': {
@@ -40,3 +43,4 @@ def plain_log_format():
         }
     }
     return d
+

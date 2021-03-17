@@ -181,6 +181,7 @@ You can configure the Functions Framework using command-line flags or environmen
 | `--target`         | `FUNCTION_TARGET`         | The name of the exported function to be invoked in response to requests. Default: `function`                                                                                                     |
 | `--signature-type` | `FUNCTION_SIGNATURE_TYPE` | The signature used when writing your function. Controls unmarshalling rules and determines which arguments are used to invoke your function. Default: `http`; accepted values: `http`, `event` or `cloudevent` |
 | `--source`         | `FUNCTION_SOURCE`         | The path to the file containing your function. Default: `main.py` (in the current working directory)                                                                                             |
+| `--log-format`     | `LOG_FORMAT`              | The format logs should be structured in. Options: `plain`, `structured`. Default: `plain`                                                                                                        |
 | `--debug`          | `DEBUG`                   | A flag that allows to run functions-framework to run in debug mode, including live reloading. Default: `False`                                                                                   |
 | `--dry-run`        | `DRY_RUN`                 | A flag that allows for testing the function build from the configuration without creating a server. Default: `False` |
 
