@@ -29,15 +29,18 @@ class TraceFilter(logging.Filter):
         self.trace_header = trace_header
 
     def filter(self, record):
-        record.trace = ""
+        trace_id = ""
         try:
             if flask and flask.request:
                 header = flask.request.headers.get(self.trace_header)
                 if header:
-                    record.trace = header.split("/", 1)[0]
+                    trace_id = header.split("/", 1)[0]
         except RuntimeError as e:
             # RuntimeError thown when flask session not found
             pass
+        if trace_id and "GCP_PROJECT" in os.environ:
+            trace_id = f"projects/{os.environ.get('GCP_PROJECT')}/trace/{trace_id}"
+        record.trace = trace_id
         return True
 
 class HttpRequestFilter(logging.Filter):
@@ -63,17 +66,6 @@ class HttpRequestFilter(logging.Filter):
             pass
         return True
 
-class GcpProjectFilter(logging.Filter):
-    """
-    Logging.Filter subclass class to inject GCP project data into log records.
-
-    Will insert an empty string when project can't be found.
-    """
-
-    def filter(self, record):
-        record.gcp_project = os.environ.get("GCP_PROJECT", "")
-        return True
-
 def get_format_dict(format_name="plain"):
     """
     Constructs a logging config dictionary to print plain logs
@@ -88,9 +80,6 @@ def get_format_dict(format_name="plain"):
             'http-request-filter': {
                 '()': "functions_framework.logging_format.HttpRequestFilter"
             },
-            'gcp-project-filter': {
-                '()': "functions_framework.logging_format.GcpProjectFilter"
-            },
         },
         'formatters':{
             'plain': {
@@ -101,7 +90,7 @@ def get_format_dict(format_name="plain"):
             },
             'gcp': {
                 'format': '{"message": "%(message)s", "severity": "%(levelname)s",'
-                + ' "logging.googleapis.com/trace": "projects/%(gcp_project)s/traces/%(trace)s",'
+                + ' "logging.googleapis.com/trace": "%(trace)s",'
                 + ' "logging.googleapis.com/sourceLocation": { "file": "%(filename)s", "line": "%(lineno)d",'
                 + ' "function": "%(funcName)s"}, "httpRequest": {"requestMethod": "%(request_method)s", '
                 + ' "requestUrl": "%(request_url)s", "userAgent": "%(user_agent)s", '
@@ -115,7 +104,6 @@ def get_format_dict(format_name="plain"):
                 'filters': [
                     "trace-filter",
                     "http-request-filter",
-                    "gcp-project-filter"
                 ]
             }
         },
