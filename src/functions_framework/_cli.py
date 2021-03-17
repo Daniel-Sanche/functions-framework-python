@@ -19,7 +19,7 @@ import click
 
 from functions_framework import create_app
 from functions_framework._http import create_server
-from functions_framework.logging_format import get_log_format
+from functions_framework.logging_format import get_format_dict
 
 
 @click.command()
